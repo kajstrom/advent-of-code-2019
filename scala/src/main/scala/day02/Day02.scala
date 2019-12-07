@@ -1,5 +1,7 @@
 package day02
 
+import utils.Utils
+
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
@@ -16,10 +18,7 @@ object Day02 {
     for (opCodeIdx <- Range(0, intcodes.length, 4)) {
       val opCode = intcodes(opCodeIdx)
 
-      println("Opcode idx", opCodeIdx)
-
       if (opCode == 99) {
-        println("Terminator...")
         return intcodes
       }
 
@@ -33,14 +32,39 @@ object Day02 {
     intcodes
   }
 
-  def main(args: Array[String]): Unit = {
-    val opcodes = Source.fromResource("day02.txt").getLines.toList.head.split(",").map(opcode => opcode.toInt).toList
+  def part1(opcodes: List[Int]): Int = {
     val opcodesMutable = opcodes.to(ListBuffer)
     opcodesMutable(1) = 12
     opcodesMutable(2) = 2
 
-    println("Opcodes total: ", opcodesMutable.length)
+    execute(opcodesMutable).head
+  }
 
-    println("Day 1, part 1: " + execute(opcodesMutable).head)
+  def part2(opcodes: List[Int]): Int = {
+    for (noun <- Range(0, 99)) {
+      for (verb <- Range(0, 99)) {
+        val opcodesMutable = opcodes.to(ListBuffer)
+        opcodesMutable(1) = noun
+        opcodesMutable(2) = verb
+
+        if (execute(opcodesMutable).head == 19690720) {
+          return 100 * noun + verb
+        }
+      }
+    }
+
+    0
+  }
+
+  def main(args: Array[String]): Unit = {
+    val opcodes = Source.fromResource("day02.txt").getLines.toList.head.split(",").map(opcode => opcode.toInt).toList
+
+    Utils.time {
+      println("Day 1, part 1: " + part1(opcodes))
+    }
+
+    Utils.time {
+      println("Day 2, part 2: " + part2(opcodes))
+    }
   }
 }
