@@ -24,5 +24,21 @@ object Day06 {
 
 
     println("Part 1: " + spaceObjects.values.map(_.countOrbits).sum)
+
+    // Find path YOU -> COM
+    val you = spaceObjects.get("YOU").get
+    val youToComPath = you.pathToCom()
+
+    // Find path SAN -> COM
+    val san = spaceObjects.get("SAN").get
+    val sanToComPath = san.pathToCom()
+
+    // Find first common space object
+    val commonObjects = youToComPath.filter(sanToComPath.contains(_))
+    val firstCommon = commonObjects.head
+
+    // Calculate steps to transfer to same orbit
+    val transfers = (you.transfersTo(firstCommon) - 1) + (san.transfersTo(firstCommon) - 1)
+    println("Part 2: " + transfers)
   }
 }
