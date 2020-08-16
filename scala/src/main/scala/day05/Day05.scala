@@ -1,22 +1,26 @@
 package day05
 
+import day05.Operation.TerminalOperation
+
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object Day05 {
-  def execute(intcodes: ListBuffer[Int], input: () => Int, output: Int => Unit): ListBuffer[Int] = {
+  def execute(intcodes: ListBuffer[Int], input: () => Int, output: Int => Unit): Unit = {
     var instructionPointer = 0
 
     while (instructionPointer < intcodes.length) {
       val opCodeOperation = Operation(instructionPointer, intcodes, input, output)
+
+      if (opCodeOperation.isInstanceOf[TerminalOperation]) {
+        return
+      }
 
       opCodeOperation.execute
       instructionPointer = opCodeOperation.pointerLocation
     }
 
     println(s"Instruction pointer overflow: $instructionPointer")
-
-    intcodes
   }
 
   def part1(opcodes: List[Int]): Unit = {
@@ -30,9 +34,20 @@ object Day05 {
       })
   }
 
-  def main(args: Array[String]): Unit = {
-    val opcodes: List[Int] = Source.fromResource("day05.txt").getLines.toList.head.split(",").map(opcode => opcode.toInt).toList
+  def part2(opcodes: List[Int]): Unit = {
+    execute(opcodes.to(ListBuffer),
+      () => 5,
+      toOutput => {
+        println(s"Part 2: $toOutput")
+      })
+  }
 
-    part1(opcodes);
+  def main(args: Array[String]): Unit = {
+    var opcodes: List[Int] = Source.fromResource("day05.txt").getLines.toList.head.split(",").map(opcode => opcode.toInt).toList
+
+    part1(opcodes)
+
+    opcodes = Source.fromResource("day05.txt").getLines.toList.head.split(",").map(opcode => opcode.toInt).toList
+    part2(opcodes)
   }
 }

@@ -7,9 +7,9 @@ import scala.collection.mutable.ListBuffer
 abstract class Operation(pointer: Int, parameterModes: List[Int], intcodes: ListBuffer[Int]) {
 
   def pointerLocation: Int
-  def execute: Unit
+  def execute(): Unit
 
-  protected def getParam(nth: Int) = {
+  protected def getParam(nth: Int): Int = {
     val paramPointer = nth + 1 + pointer // Handle off-by-one from using 0 as first param
     var value = 999999
 
@@ -81,7 +81,71 @@ object Operation {
     }
   }
 
-  private class TerminalOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
+  private class JumpIfTrueOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
+    extends Operation(pointer, parameterModes, intcodes) {
+    private var newPointerLoc = -1
+    override def pointerLocation: Int = {
+      if (newPointerLoc != -1) {
+        newPointerLoc
+      } else {
+        pointer + 3
+      }
+    }
+
+    override def execute: Unit = {
+      val a = getParam(0)
+
+      if (a != 0) {
+        newPointerLoc = getParam(1)
+      }
+    }
+  }
+
+  private class JumpIfFalseOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
+    extends Operation(pointer, parameterModes, intcodes) {
+    private var newPointerLoc = -1
+    override def pointerLocation: Int = {
+      if (newPointerLoc != -1) {
+        newPointerLoc
+      } else {
+        pointer + 3
+      }
+    }
+
+    override def execute: Unit = {
+      val a = getParam(0)
+
+      if (a == 0) {
+        newPointerLoc = getParam(1)
+      }
+    }
+  }
+
+  private class LessThanOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
+    extends Operation(pointer, parameterModes, intcodes) {
+    override def pointerLocation: Int = pointer + 4
+
+    override def execute: Unit = {
+      val a = getParam(0)
+      val b = getParam(1)
+
+      intcodes(intcodes(3 + pointer)) = if (a < b)  1 else 0
+    }
+  }
+
+  private class EqualsOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
+    extends Operation(pointer, parameterModes, intcodes) {
+    override def pointerLocation: Int = pointer + 4
+
+    override def execute: Unit = {
+      val a = getParam(0)
+      val b = getParam(1)
+
+      intcodes(intcodes(3 + pointer)) = if (a == b)  1 else 0
+    }
+  }
+
+  class TerminalOperation(pointer: Int, intcodes: ListBuffer[Int], parameterModes: List[Int])
     extends Operation(pointer, parameterModes, intcodes) {
     override def pointerLocation: Int = pointer + 2
 
@@ -100,6 +164,10 @@ object Operation {
       case 2 => new MultiplyOperation(pointer, intcodes, parameterModes)
       case 3 => new InputOperation(pointer, intcodes, parameterModes, input)
       case 4 => new OutputOperation(pointer, intcodes, parameterModes, output)
+      case 5 => new JumpIfTrueOperation(pointer, intcodes, parameterModes)
+      case 6 => new JumpIfFalseOperation(pointer, intcodes, parameterModes)
+      case 7 => new LessThanOperation(pointer, intcodes, parameterModes)
+      case 8 => new EqualsOperation(pointer, intcodes, parameterModes)
       case 99 => new TerminalOperation(pointer, intcodes, parameterModes)
     }
   }
