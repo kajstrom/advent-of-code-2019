@@ -8,15 +8,10 @@ object Day05 {
     var instructionPointer = 0
 
     while (instructionPointer < intcodes.length) {
-      val opCodeParam = OpCodeParameter(intcodes(instructionPointer))
+      val opCodeOperation = Operation(instructionPointer, intcodes, input, output)
 
-      if (opCodeParam.opCode == 99) {
-        return intcodes
-      }
-
-      opCodeParam.execute(intcodes, instructionPointer, input, output)
-
-      instructionPointer += opCodeParam.stepsForward
+      opCodeOperation.execute
+      instructionPointer = opCodeOperation.pointerLocation
     }
 
     println(s"Instruction pointer overflow: $instructionPointer")
